@@ -1,0 +1,35 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "non-dev-output",
+  "description": "비개발자를 위한 Claude Code 플러그인 — 기술 설명을 일상 비유로 자동 번역하고, 한국어 글쓰기를 자연스럽게 보정합니다. 별도 커맨드 없이 훅이 자동 감지합니다.",
+  "owner": {
+    "name": "calmtiger86",
+    "url": "https://github.com/calmtiger86"
+  },
+  "plugins": [
+    {
+      "name": "non-dev-output",
+      "description": "Explains tech in human language. Auto-detects confusion → analogy mode. Auto-detects writing requests → natural Korean prose. No commands needed.",
+      "version": "1.0.0",
+      "author": {
+        "name": "calmtiger86",
+        "url": "https://github.com/calmtiger86"
+      },
+      "source": "./",
+      "category": "productivity",
+      "homepage": "https://github.com/calmtiger86/non-dev-output",
+      "repository": "https://github.com/calmtiger86/non-dev-output",
+      "license": "MIT",
+      "tags": [
+        "korean",
+        "non-developer",
+        "output-clarity",
+        "analogy",
+        "writing",
+        "hooks",
+        "accessibility"
+      ]
+    }
+  ],
+  "version": "1.0.0"
+}
