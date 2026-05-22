@@ -2,7 +2,7 @@
 
 # non-dev-output
 
-### A Claude Code plugin that explains tech like you're a human, not a compiler.
+### A Claude Code plugin that speaks human, not compiler.
 
 [![Version](https://img.shields.io/badge/version-1.0.0-6c63ff.svg?style=flat-square)](https://github.com/calmtiger86/non-dev-output/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-22c55e.svg?style=flat-square)](LICENSE)
@@ -22,57 +22,64 @@
 
 ## The Problem
 
-Claude gives brilliant answers. But when you ask *"why is my app slow?"*, it responds:
+Claude is smart. But ask *"why is my app slow?"* and you get:
 
 > *"The bottleneck appears to be N+1 query generation in the ORM layer, causing redundant round-trips to the database."*
 
-You came here to understand something. You left more confused than before.
+You close the tab knowing less than before.
 
-**non-dev-output** solves this at the source — automatically, before Claude even types its first word.
+**non-dev-output** steps in before Claude types a single word. Automatically.
 
 ---
 
-## What Happens After You Install
+## After You Install
 
-**Scenario 1 — You're confused by an explanation:**
+**Scenario 1 — You didn't follow the explanation:**
 
 ```
-You:    "I still don't understand what a database index is"
+You:    "I still don't get what a database index is"
 
 Claude: ──────────────────────────────────────────────────────────
         By analogy ↓
-        Imagine a 1,000-page dictionary. Finding the word "serendipity"
-        without an alphabetical index means reading from page 1. An index
-        (the A–Z tabs on the side) lets you jump straight to "S."
-        A database index works the same way — it's the A–Z tabs
-        for your data, trading a little storage for a lot of speed.
+        A dictionary has A–Z tabs on the side.
+        To find "serendipity" you flip to S — not page one.
+        A database index is that tab.
+        A bit more space on disk, but finding rows gets fast.
 
         In reality ↓
         CREATE INDEX idx ON table(column);
-        Use EXPLAIN to confirm the index is being used.
-        Only index columns you query frequently — indexes have
-        a maintenance cost on writes.
+        Use EXPLAIN to confirm the index is being hit.
+        Only index columns you read often — indexes slow down writes.
 ```
 
-You didn't type any command. The plugin detected *"I still don't understand"* and switched modes automatically.
+No command typed. The plugin caught *"I still don't get"* and switched modes.
 
-**Scenario 2 — You're writing a blog post or social caption:**
+**Scenario 2 — You asked for a blog post:**
 
 ```
 You:    "Write a blog post about why coffee makes you more productive"
 
-Claude: (writes without AI clichés — no "Firstly, it is important to note
-        that...", no three-bullet summaries of three-bullet lists,
-        no "In conclusion" paragraphs that say nothing new)
+Without plugin:
+        Coffee has many effects on productivity.
+        Firstly, caffeine improves focus.
+        Secondly, it reduces fatigue.
+        In conclusion, coffee has a positive impact on productivity.
+
+With plugin:
+        Every morning, one cup. Just to wake up.
+        But caffeine does something more specific than that —
+        it blocks the signal that tells your brain it's tired.
+        While that signal is paused, your thinking gets sharper.
+        We call that focus.
 ```
 
-Again — no command. The plugin detected the writing request and applied prose standards silently.
+No command. The plugin detected a writing request and cut the boilerplate.
 
 ---
 
 ## Installation
 
-### Option A — via `claude plugin` (recommended if you have Claude Code CLI)
+### Option A — via `claude plugin` (recommended)
 
 ```bash
 claude plugin marketplace add https://github.com/calmtiger86/non-dev-output
@@ -92,9 +99,9 @@ Restart Claude Code. Done.
 ### Option C — manual (works everywhere)
 
 **Step 1** — Make sure [Node.js](https://nodejs.org) is installed (v18 or higher).  
-If you can run `node --version` in a terminal, you're ready.
+Run `node --version` in a terminal. If a version number appears, you're ready.
 
-**Step 2** — Download this repository:
+**Step 2** — Clone this repository:
 
 ```bash
 git clone https://github.com/calmtiger86/non-dev-output
@@ -109,15 +116,15 @@ node install.js
 
 **Step 4** — Restart Claude Code. Done.
 
-> No npm install. No configuration files. No API keys.
+> No npm install. No config files. No API keys.
 
 ---
 
 ## Trigger Words
 
-The plugin watches for these automatically — you never have to type a command.
+The plugin watches for these — no commands needed.
 
-**Clarity triggers** (switches to analogy mode):
+**When you're confused:**
 
 | What you type | Language |
 |---------------|----------|
@@ -126,7 +133,7 @@ The plugin watches for these automatically — you never have to type a command.
 | "什么意思", "看不懂", "简单说一下" | Chinese |
 | "too technical", "what?", "explain it again" | English |
 
-**Writing triggers** (switches to natural prose mode):
+**When you're writing:**
 
 | What you type | Language |
 |---------------|----------|
@@ -136,7 +143,7 @@ The plugin watches for these automatically — you never have to type a command.
 
 ---
 
-## How It Works (For the Curious)
+## How It Works
 
 ```
 Every session start
@@ -149,7 +156,7 @@ Every message you send
     └── Writing detected  → injects [WRITING-INTENT] instruction
 ```
 
-The key design choice: **no false positives**. Writing detection requires both a content keyword (blog, newsletter…) AND an action verb (write, draft, create…). Mentioning a blog in passing won't trigger it.
+Key design: **no false positives**. Writing mode needs both a subject (blog, newsletter…) and an action (write, draft…) in the same message. Casually mentioning a blog won't set it off.
 
 ---
 
@@ -179,8 +186,8 @@ non-dev-output/
 # Remove plugin files
 rm -rf ~/.claude/plugins/non-dev-output
 
-# Then open ~/.claude/settings.json and remove the two entries
-# that reference "non-dev-output" under the "hooks" section.
+# Open ~/.claude/settings.json and delete the two entries
+# under "hooks" that reference "non-dev-output".
 ```
 
 ---
