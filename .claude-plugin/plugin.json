@@ -9,12 +9,6 @@
   "homepage": "https://github.com/calmtiger86/non-dev-output",
   "repository": "https://github.com/calmtiger86/non-dev-output",
   "license": "MIT",
-  "hooks": {
-    "SessionStart": ["hooks/session-start.mjs"],
-    "UserPromptSubmit": ["hooks/clarity-keywords.mjs"]
-  },
-  "rules": ["rules/output-clarity.md"],
-  "skills": ["skills/explain-by-analogy", "skills/ko-humanche-calmta"],
   "keywords": [
     "korean",
     "non-developer",
