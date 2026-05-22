@@ -1,10 +1,10 @@
 <div align="center">
 
-# 🧠 Claude Output Clarity
+# 🧠 non-dev-output
 
 **用人类语言说话的 Claude Code 插件。**
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/calmtiger86/claude-output-clarity)
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/calmtiger86/non-dev-output)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-blueviolet.svg)](https://claude.ai/code)
 [![Language](https://img.shields.io/badge/language-KO%20%7C%20EN%20%7C%20ZH-orange.svg)](#)
@@ -19,7 +19,7 @@
 
 Claude 很聪明。但当它解释**竞态条件**时，它会说"多个工作线程在没有同步的情况下并发访问共享资源"。而你真正需要的是：*两位厨师同时抢走同一张点餐单。*
 
-**Claude Output Clarity** 解决这个问题。自动运行。无需命令。安装即用。
+**non-dev-output** 解决这个问题。自动运行。无需命令。安装即用。
 
 ---
 
@@ -83,7 +83,7 @@ omc install non-dev-output
 ### 手动安装
 ```bash
 # 克隆到 Claude 插件目录
-git clone https://github.com/calmtiger86/claude-output-clarity \
+git clone https://github.com/calmtiger86/non-dev-output \
   ~/.claude/plugins/non-dev-output
 
 # 重启 Claude Code

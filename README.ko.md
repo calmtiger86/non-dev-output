@@ -1,10 +1,10 @@
 <div align="center">
 
-# 🧠 Claude Output Clarity
+# 🧠 non-dev-output
 
 **사람의 언어로 말하는 Claude Code 플러그인.**
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/calmtiger86/claude-output-clarity)
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/calmtiger86/non-dev-output)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-blueviolet.svg)](https://claude.ai/code)
 [![Language](https://img.shields.io/badge/language-KO%20%7C%20EN%20%7C%20ZH-orange.svg)](#)
@@ -19,7 +19,7 @@
 
 Claude는 똑똑합니다. 하지만 **레이스 컨디션**을 설명할 때 "동기화 없이 공유 자원에 동시 접근하는 워커 스레드"라고 말합니다. 당신에게 필요한 건 이거였는데: *두 요리사가 같은 주문표를 동시에 집는 상황.*
 
-**Claude Output Clarity**가 그걸 고쳐줍니다. 자동으로. 명령 없이. 그냥 설치하고 말만 하면 됩니다.
+**non-dev-output**가 그걸 고쳐줍니다. 자동으로. 명령 없이. 그냥 설치하고 말만 하면 됩니다.
 
 ---
 
@@ -86,7 +86,7 @@ omc install non-dev-output
 ### 수동 설치
 ```bash
 # Claude 플러그인 디렉토리에 클론
-git clone https://github.com/calmtiger86/claude-output-clarity \
+git clone https://github.com/calmtiger86/non-dev-output \
   ~/.claude/plugins/non-dev-output
 
 # Claude Code 재시작

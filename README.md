@@ -1,10 +1,10 @@
 <div align="center">
 
-# 🧠 Claude Output Clarity
+# 🧠 non-dev-output
 
 **The Claude Code plugin that speaks human.**
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/calmtiger86/claude-output-clarity)
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/calmtiger86/non-dev-output)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-blueviolet.svg)](https://claude.ai/code)
 [![Language](https://img.shields.io/badge/language-KO%20%7C%20EN%20%7C%20ZH-orange.svg)](#)
@@ -19,7 +19,7 @@
 
 Claude is brilliant. But when it explains a **race condition**, it says "concurrent worker threads accessing a shared resource without synchronization." When what you actually needed was: *two chefs grabbing the same order ticket at the same time.*
 
-**Claude Output Clarity** fixes that. Automatically. No commands. No setup. Just install and talk.
+**non-dev-output** fixes that. Automatically. No commands. No setup. Just install and talk.
 
 ---
 
@@ -87,7 +87,7 @@ omc install non-dev-output
 ### Manual
 ```bash
 # Clone to your Claude plugins directory
-git clone https://github.com/calmtiger86/claude-output-clarity \
+git clone https://github.com/calmtiger86/non-dev-output \
   ~/.claude/plugins/non-dev-output
 
 # Restart Claude Code
