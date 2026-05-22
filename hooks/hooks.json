@@ -1,0 +1,26 @@
+{
+  "description": "비개발자 친화 출력 + 한국어 글쓰기 보정 훅",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PLUGIN_ROOT/hooks/session-start.sh\""
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PLUGIN_ROOT/hooks/clarity-keywords.mjs\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
