@@ -1,137 +1,170 @@
 <div align="center">
 
-# 🧠 non-dev-output
+# non-dev-output
 
-**用人类语言说话的 Claude Code 插件。**
+### 用人话说话的 Claude Code 插件
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/calmtiger86/non-dev-output)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-blueviolet.svg)](https://claude.ai/code)
-[![Language](https://img.shields.io/badge/language-KO%20%7C%20EN%20%7C%20ZH-orange.svg)](#)
+[![Version](https://img.shields.io/badge/version-1.0.0-6c63ff.svg?style=flat-square)](https://github.com/calmtiger86/non-dev-output/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-22c55e.svg?style=flat-square)](LICENSE)
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316.svg?style=flat-square)](https://claude.ai/code)
+[![Platform](https://img.shields.io/badge/platform-Mac%20%7C%20Linux%20%7C%20Windows-0ea5e9.svg?style=flat-square)](#安装)
 
-[한국어](README.ko.md) · [English](README.md) · [中文](README.zh.md)
+**[한국어](README.ko.md) · [English](README.md) · 中文**
+
+<br/>
+
+> *你不需要学计算机的语言。*  
+> *让计算机来学你的语言。*
 
 </div>
 
 ---
 
-> *"理解最大的障碍不是复杂性，而是词汇。"*
+## 问题所在
 
-Claude 很聪明。但当它解释**竞态条件**时，它会说"多个工作线程在没有同步的情况下并发访问共享资源"。而你真正需要的是：*两位厨师同时抢走同一张点餐单。*
+Claude 很聪明。但当你问"为什么我的应用变慢了？"，它会这样回答：
 
-**non-dev-output** 解决这个问题。自动运行。无需命令。安装即用。
+> *"瓶颈似乎在于 ORM 层生成的 N+1 查询，导致与数据库的冗余往返次数增加。"*
 
----
+你来是想弄懂一件事，离开时却比来时更迷惑。
 
-## ✨ 功能介绍
-
-### 🎯 自动检测困惑
-当你输入 *"这是什么意思？"*、*"我不理解"*、*"用简单的话解释"* — 钩子立即触发，将 Claude 切换到**类比模式**。
-
-```
-你:     "我不明白死锁是什么"
-Claude: ──────────────────────────────────────────────────
-        用类比来说
-        两个人在狭窄的走廊里面对面站着。A 拿着右门的钥匙
-        （锁1），等待左边的。B 则相反。两人都不让步，永远
-        僵住了（死锁）。楼管（数据库引擎）必须强制把一个人
-        拉回去（回滚）才能解开。
-
-        实际上
-        两个事务相互等待对方的锁，形成循环等待。RDBMS 在
-        等待图中检测到循环，回滚其中一方。预防方法：所有事务
-        按相同顺序获取锁（锁排序）。
-```
-
-### ✍️ 中文/韩文写作自动优化
-当你要求 *"写一篇博客"*、*"起草新闻稿"*、*"制作卡片新闻"* — Claude 自动：
-- 去除 AI 默认修辞结构（过度加粗、惯性三点式、冗余表述）
-- 以句子为单位使用主动语态
-- 核心只有一个时只说一个——没有填充内容
-
-### 📚 持续学习的类比库
-每当一个类比奏效，它就会被记录。下次会话从*已为你校准*的类比开始。
+**non-dev-output** 从根源解决这个问题——自动触发，在 Claude 打出第一个字之前。
 
 ---
 
-## ⚡ 工作原理
+## 安装后的变化
+
+**场景一——你没听懂解释：**
 
 ```
-会话开始
-└── session-start.sh
-    └── 将 output-clarity 规则注入每个对话
+你:     "我还是不明白数据库索引是什么"
 
-每条提示（UserPromptSubmit 钩子）
-└── clarity-keywords.mjs
-    ├── 模式："什么意思 / 不理解 / 简单解释"
-    │   └── → [CLARITY-MISS] 信号 → 类比翻译模式
-    └── 模式："博客/新闻稿/卡片新闻 + 写/起草/制作"
-        └── → [WRITING-INTENT] 信号 → 写作优化模式
+Claude: ──────────────────────────────────────────────────────────
+        用类比来说 ↓
+        想象一本1000页的词典。没有索引，找"星星"这个词
+        就得从第1页翻起。有了索引（旁边的字母标签），
+        直接翻到"X"就行了。
+        数据库索引就是数据的"字母标签"——用一点额外空间，
+        换来极快的查找速度。
+
+        实际上 ↓
+        CREATE INDEX idx ON 表名(列名);
+        用 EXPLAIN 确认索引确实在被使用。
+        只给查询频繁的列建索引——索引对写入有维护成本。
 ```
 
-**零误报** — 写作检测需要内容类型关键词 + 行为动词的 AND 条件。*"我在博客上看到这个代码"* → 静默通过。*"帮我写一篇博客"* → 触发。
+你什么命令都没输入。插件检测到"还是不明白"，自动切换了模式。
+
+**场景二——你要写博客或公众号文章：**
+
+```
+你:     "帮我写一篇关于咖啡为什么能提高效率的博客"
+
+Claude: （没有 AI 惯用套话——不会有"首先，值得注意的是……"，
+         不会把三点总结再总结三遍，
+         不会有什么都没说的"综上所述"结尾）
+```
+
+同样没有命令。插件检测到写作请求，悄悄应用了文字规范。
 
 ---
 
-## 📦 安装
+## 安装
 
-### 通过 OMC（推荐）
+**第一步** — 确认已安装 [Node.js](https://nodejs.org)（18 版本或以上）。  
+在终端运行 `node --version`，能看到版本号就说明准备好了。
+
+**第二步** — 下载本仓库：
+
 ```bash
-omc install non-dev-output
+git clone https://github.com/calmtiger86/non-dev-output
+cd non-dev-output
 ```
 
-### 手动安装
+**第三步** — 运行安装脚本：
+
 ```bash
-# 克隆到 Claude 插件目录
-git clone https://github.com/calmtiger86/non-dev-output \
-  ~/.claude/plugins/non-dev-output
-
-# 重启 Claude Code
+node install.js
 ```
 
-> **环境要求：** Node.js 18+ · Claude Code · 无外部 npm 依赖
+**第四步** — 重启 Claude Code，完成。
+
+> 不需要 npm install。不需要配置文件。不需要 API 密钥。
 
 ---
 
-## 🎛️ 触发词参考
+## 自动触发词
 
-| 触发模式 | 语言 | 动作 |
-|----------|------|------|
-| "什么意思"、"不理解"、"简单解释" | 中文 | 类比模式 |
-| "무슨 말이야"、"이해 안 돼"、"쉽게 설명해줘" | 韩语 | 类比模式 |
-| "what does that mean"、"I don't understand" | 英文 | 类比模式 |
-| "写博客"、"起草新闻稿"、"制作卡片" | 中文 | 写作优化模式 |
-| "블로그 써줘"、"카드뉴스 만들어줘" | 韩语 | 写作优化模式 |
+插件自动监听以下内容——你无需输入任何命令。
+
+**没听懂时（切换到类比模式）：**
+
+| 你输入的内容 | 语言 |
+|-------------|------|
+| "什么意思"、"看不懂"、"简单说一下" | 中文 |
+| "再解释一次"、"太难了"、"不明白" | 中文 |
+| "이해가 안 돼", "무슨 말이야" | 韩语 |
+| "I don't understand", "what does that mean" | 英语 |
+
+**写作请求时（切换到自然文笔模式）：**
+
+| 你输入的内容 | 语言 |
+|-------------|------|
+| "写博客"、"写公众号文章"、"写小红书" | 中文 |
+| "写新闻稿"、"帮我起草一篇文章" | 中文 |
+| "블로그 써줘", "카드뉴스 만들어줘" | 韩语 |
 
 ---
 
-## 🗂️ 文件结构
+## 工作原理（给好奇的人）
+
+```
+每次会话开始
+└── 将"双块规则"注入 Claude 的对话上下文
+    （类比块 + 现实块，不混在一起）
+
+每条消息发送时
+└── 扫描困惑信号或写作信号
+    ├── 检测到困惑 → 注入 [CLARITY-MISS] 指令
+    └── 检测到写作 → 注入 [WRITING-INTENT] 指令
+```
+
+核心设计原则：**零误报**。写作检测需要内容关键词（博客、公众号……）和行为动词（写、起草、制作……）同时存在才会触发。随口提到"博客"不会触发。
+
+---
+
+## 文件结构
 
 ```
 non-dev-output/
-├── .claude-plugin/
-│   └── plugin.json              # 插件清单
 ├── hooks/
-│   ├── hooks.json               # 安装时自动连线（无需手动配置）
-│   ├── session-start.sh         # 会话启动时注入规则
-│   └── clarity-keywords.mjs    # 模式检测引擎（自包含）
+│   ├── hooks.json               ← 安装时自动注册
+│   ├── session-start.mjs        ← 会话启动时加载规则
+│   └── clarity-keywords.mjs    ← 模式检测（自包含）
 ├── rules/
-│   └── output-clarity.md       # "双块"类比规则
-└── skills/
-    ├── explain-by-analogy/      # 深度类比构建技能
-    └── ko-humanche-calmta/      # 韩语散文语调校正技能
+│   └── output-clarity.md       ← 双块规则
+├── skills/
+│   ├── explain-by-analogy/      ← 深度类比构建技能
+│   └── ko-humanche-calmta/      ← 韩语散文校正技能
+├── install.js                   ← 跨平台安装脚本
+├── install.sh                   ← Mac/Linux 快捷方式
+└── install.ps1                  ← Windows 快捷方式
 ```
 
 ---
 
-## 🤝 设计理念
+## 卸载
 
-这个插件基于一个信念：**学习中最难的部分不是概念本身，而是用来描述概念的词语**。竞态条件并不难理解。"并发线程同步失败"才难。
+```bash
+# 删除插件文件
+rm -rf ~/.claude/plugins/non-dev-output
 
-Claude 生成的每一个类比都接受一个问题的检验：*一个从未写过代码的人能在 10 秒内理解这个吗？*
+# 打开 ~/.claude/settings.json
+# 在 "hooks" 部分删除包含 "non-dev-output" 路径的两个条目。
+```
 
 ---
 
-## 📄 许可证
+## 许可证
 
 MIT © [calmtiger86](https://github.com/calmtiger86)
