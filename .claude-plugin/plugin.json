@@ -1,11 +1,13 @@
 {
   "name": "non-dev-output",
   "version": "1.0.0",
-  "description": "비개발자 친화 출력 + 한국어 글쓰기 자동 보정. 명령 없이 훅이 자동 감지하여 작동합니다.",
+  "description": "Explains tech in human language. Auto-detects confusion → analogy mode. Auto-detects writing requests → natural Korean prose. No commands needed.",
   "author": {
-    "name": "jungminkim",
-    "url": "https://github.com/jungminkim"
+    "name": "calmtiger86",
+    "url": "https://github.com/calmtiger86"
   },
+  "homepage": "https://github.com/calmtiger86/non-dev-output",
+  "repository": "https://github.com/calmtiger86/non-dev-output",
   "license": "MIT",
   "keywords": [
     "korean",
@@ -13,6 +15,7 @@
     "output-clarity",
     "analogy",
     "writing",
-    "hooks"
+    "hooks",
+    "accessibility"
   ]
 }
