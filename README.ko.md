@@ -71,6 +71,25 @@ Claude: (AI 특유의 클리셰 없이 작성 — "첫째로, 중요한 점은..
 
 ## 설치
 
+### 방법 A — `claude plugin`으로 설치 (Claude Code CLI가 있는 경우 권장)
+
+```bash
+claude plugin marketplace add https://github.com/calmtiger86/non-dev-output
+claude plugin install non-dev-output@non-dev-output
+```
+
+Claude Code 재시작. 끝.
+
+### 방법 B — `omc install`로 설치 (oh-my-claudecode 사용 시)
+
+```bash
+omc install https://github.com/calmtiger86/non-dev-output
+```
+
+Claude Code 재시작. 끝.
+
+### 방법 C — 직접 설치 (어디서나 동작)
+
 **1단계** — [Node.js](https://nodejs.org)가 설치돼 있는지 확인합니다 (버전 18 이상).  
 터미널에서 `node --version`을 실행해서 버전이 나오면 준비 완료입니다.
 

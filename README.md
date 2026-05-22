@@ -72,6 +72,25 @@ Again — no command. The plugin detected the writing request and applied prose 
 
 ## Installation
 
+### Option A — via `claude plugin` (recommended if you have Claude Code CLI)
+
+```bash
+claude plugin marketplace add https://github.com/calmtiger86/non-dev-output
+claude plugin install non-dev-output@non-dev-output
+```
+
+Restart Claude Code. Done.
+
+### Option B — via `omc install` (if you use oh-my-claudecode)
+
+```bash
+omc install https://github.com/calmtiger86/non-dev-output
+```
+
+Restart Claude Code. Done.
+
+### Option C — manual (works everywhere)
+
 **Step 1** — Make sure [Node.js](https://nodejs.org) is installed (v18 or higher).  
 If you can run `node --version` in a terminal, you're ready.
 
@@ -85,10 +104,6 @@ cd non-dev-output
 **Step 3** — Run the installer:
 
 ```bash
-# Mac / Linux
-node install.js
-
-# Windows (PowerShell)
 node install.js
 ```
 

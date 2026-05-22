@@ -71,6 +71,25 @@ Claude: （没有 AI 惯用套话——不会有"首先，值得注意的是…�
 
 ## 安装
 
+### 方式 A — 使用 `claude plugin`（推荐，如有 Claude Code CLI）
+
+```bash
+claude plugin marketplace add https://github.com/calmtiger86/non-dev-output
+claude plugin install non-dev-output@non-dev-output
+```
+
+重启 Claude Code，完成。
+
+### 方式 B — 使用 `omc install`（适用于 oh-my-claudecode 用户）
+
+```bash
+omc install https://github.com/calmtiger86/non-dev-output
+```
+
+重启 Claude Code，完成。
+
+### 方式 C — 手动安装（适用于所有环境）
+
 **第一步** — 确认已安装 [Node.js](https://nodejs.org)（18 版本或以上）。  
 在终端运行 `node --version`，能看到版本号就说明准备好了。
 
