@@ -59,8 +59,8 @@ function reaskScope(prompt) {
   const last = (lines[lines.length - 1] || '').trim();
   // ponytail: 앞 300자 + 짧은 마지막 줄. 실측으로 오탐 38/104건이 2건으로 줄고
   // 진짜 재질문 32건은 그대로 잡힌다. 남은 2건은 프롬프트의 마지막 줄 자체가
-  // 짧은 인용문인 경우다. 여기서 더 조이면 진짜 재질문을 놓치기 시작하므로
-  // 두었다. 더 줄여야 하면 인용 표지(답글), 원문), >) 판정을 붙일 것.
+  // 짧은 인용문인 경우다. 더 조이는 규칙은 진짜 재질문을 잃을 위험이 있어
+  // 시험하지 않았다. 더 줄여야 하면 인용 표지(답글), 원문), >) 판정을 붙일 것.
   if (last && last.length <= TAIL_LINE_MAX && prompt.length > HEAD_WINDOW) {
     return head + '\n' + last;
   }
@@ -84,6 +84,8 @@ function pruneClaims(dir) {
   } catch { /* 청소 실패는 무시 */ }
 }
 
+// sessionId가 비면 세션 구분이 사라져, 서로 다른 세션의 같은 프롬프트가
+// TTL 안에서 충돌한다. 호출부에서 transcript_path로 대체한다.
 function claimOnce(sessionId, prompt) {
   try {
     const dir = join(homedir(), '.omc', 'state', 'clarity-claims');
@@ -171,7 +173,7 @@ async function main() {
     }
 
     // 사본이 여럿이면 여기까지는 전부 도달한다. 실제 주입은 하나만 한다.
-    if (!claimOnce(data.session_id || '', prompt)) {
+    if (!claimOnce(data.session_id || data.transcript_path || '', prompt)) {
       process.stdout.write(JSON.stringify({ continue: true, suppressOutput: true }) + '\n');
       return;
     }
