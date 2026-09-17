@@ -9,7 +9,7 @@
  * 외부 의존성 없이 자체 완결 (Node.js 내장 모듈만 사용).
  */
 
-import { appendFileSync, mkdirSync, writeFileSync, statSync, readdirSync, unlinkSync } from 'fs';
+import { appendFileSync, mkdirSync, writeFileSync, statSync, readdirSync, unlinkSync, existsSync, readFileSync } from 'fs';
 import { createHash } from 'crypto';
 import { homedir } from 'os';
 import { join } from 'path';
@@ -134,11 +134,32 @@ function logEvent(type, prompt, match) {
 
 // ── 스킬 안내 메시지 ────────────────────────────────────────────────────────
 
-const CLARITY_MISS_MSG =
-  '[CLARITY-MISS] 직전 설명이 안 통했거나 사용자가 더 쉬운 설명을 원합니다. ' +
-  '하나의 일상 비유로 번역하세요: "비유로" 블록(장면 끝까지, 기술용어=괄호 태그) + "실제로는" 블록(기술 원문). ' +
-  '비유와 기술을 한 문장에 섞지 않습니다. 강제 3박자 금지. ' +
-  '비유가 통하면 ~/.claude/rules/common/output-clarity.md의 LEARNED-ANALOGY 섹션에 기록하세요.';
+// 비유 기록 위치는 설치마다 다르다. 규칙 파일을 손수 관리하는 사용자는
+// LEARNED-ANALOGY 블록을 떼고 별도 파일로 옮겨 두기도 한다. 없는 곳을 가리키면
+// 모델은 매번 있지도 않은 섹션을 찾는다. 있는 곳만 가리키고, 없으면 그 문장을 뺀다.
+function analogyStore() {
+  const home = homedir();
+  const external = join(home, '.claude', 'data', 'learned-analogies.md');
+  if (existsSync(external)) return '~/.claude/data/learned-analogies.md';
+
+  const rules = join(home, '.claude', 'rules', 'common', 'output-clarity.md');
+  try {
+    if (readFileSync(rules, 'utf-8').includes('LEARNED-ANALOGY')) {
+      return '~/.claude/rules/common/output-clarity.md의 LEARNED-ANALOGY 섹션';
+    }
+  } catch { /* 규칙 파일이 없으면 기록처도 없다 */ }
+
+  return null;
+}
+
+function clarityMissMessage() {
+  const base =
+    '[CLARITY-MISS] 직전 설명이 안 통했거나 사용자가 더 쉬운 설명을 원합니다. ' +
+    '하나의 일상 비유로 번역하세요: "비유로" 블록(장면 끝까지, 기술용어=괄호 태그) + "실제로는" 블록(기술 원문). ' +
+    '비유와 기술을 한 문장에 섞지 않습니다. 강제 3박자 금지.';
+  const store = analogyStore();
+  return store ? base + ' 비유가 통하면 ' + store + '에 기록하세요.' : base;
+}
 
 const WRITING_INTENT_MSG =
   '[WRITING-INTENT] 사용자가 한국어 글쓰기(블로그/카드뉴스/SNS 등)를 요청했습니다. ' +
@@ -182,7 +203,7 @@ async function main() {
 
     if (clarityMatch) {
       logEvent('clarity_reask', prompt, clarityMatch);
-      messages.push(CLARITY_MISS_MSG);
+      messages.push(clarityMissMessage());
     }
 
     if (writingMatch) {

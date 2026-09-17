@@ -3,6 +3,8 @@
 import assert from 'assert';
 import { execFileSync } from 'child_process';
 import { randomUUID } from 'crypto';
+import { existsSync, readFileSync } from 'fs';
+import { homedir } from 'os';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -46,4 +48,24 @@ assert.ok(fired(run(p, randomUUID())), '다른 세션까지 막으면 안 된다
 const plain = run('파일 목록 보여줘');
 assert.ok(!fired(plain) && plain.continue === true, '무관한 프롬프트에 반응했다');
 
-console.log('통과: 5개 항목');
+// 6. 비유 기록처는 실제로 있는 곳만 가리킨다 (없는 섹션 지시 금지)
+{
+  const r = run('이게 무슨 말이야?');
+  const msg = String(r.additionalContext || '');
+  const m = msg.match(/비유가 통하면 (.+?)에 기록하세요/);
+  if (m) {
+    const target = m[1];
+    const path = target.startsWith('~/.claude/data/')
+      ? join(homedir(), '.claude', 'data', 'learned-analogies.md')
+      : join(homedir(), '.claude', 'rules', 'common', 'output-clarity.md');
+    assert.ok(existsSync(path), `기록처로 안내한 파일이 없다: ${target}`);
+    if (!target.startsWith('~/.claude/data/')) {
+      assert.ok(readFileSync(path, 'utf-8').includes('LEARNED-ANALOGY'),
+        '규칙 파일을 가리켰는데 LEARNED-ANALOGY 섹션이 없다');
+    }
+  }
+  // 기록처가 없으면 그 문장 자체가 없어야 한다
+  assert.ok(m || !msg.includes('기록하세요'), '없는 기록처를 가리켰다');
+}
+
+console.log('통과: 6개 항목');
