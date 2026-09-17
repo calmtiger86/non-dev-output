@@ -1,6 +1,6 @@
 {
   "name": "non-dev-output",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Explains tech in human language. Auto-detects confusion → analogy mode. Auto-detects writing requests → natural Korean prose. No commands needed.",
   "author": {
     "name": "calmtiger86",
