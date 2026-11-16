@@ -3,10 +3,12 @@
   "hooks": {
     "SessionStart": [
       {
+        "matcher": "startup|clear|compact",
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PLUGIN_ROOT/hooks/session-start.mjs\""
+            "command": "cat \"${CLAUDE_PLUGIN_ROOT}/rules/output-clarity.md\"; exit 0",
+            "timeout": 5
           }
         ]
       }
