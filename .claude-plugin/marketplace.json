@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "non-dev-output",
-  "description": "비개발자를 위한 Claude Code 플러그인 — 기술 설명을 일상 비유로 자동 번역하고, 한국어 글쓰기를 자연스럽게 보정합니다. 별도 커맨드 없이 훅이 자동 감지합니다.",
+  "description": "비개발자를 위한 Claude Code 플러그인입니다. 세션을 시작할 때 '비유로 / 실제로는' 두 블록 규칙을 불러와 기술 설명을 일상 비유로 풀어 주고, 한국어 글쓰기를 자연스럽게 다듬는 스킬도 들어 있습니다.",
   "owner": {
     "name": "calmtiger86",
     "url": "https://github.com/calmtiger86"
@@ -9,8 +9,8 @@
   "plugins": [
     {
       "name": "non-dev-output",
-      "description": "Explains tech in human language. Auto-detects confusion → analogy mode. Auto-detects writing requests → natural Korean prose. No commands needed.",
-      "version": "1.1.0",
+      "description": "Explains tech in human language. Loads a two-block rule (analogy + reality) at session start, plus skills for building analogies and polishing Korean prose. No Node.js required.",
+      "version": "2.0.0",
       "author": {
         "name": "calmtiger86",
         "url": "https://github.com/calmtiger86"
@@ -31,5 +31,5 @@
       ]
     }
   ],
-  "version": "1.1.0"
+  "version": "2.0.0"
 }

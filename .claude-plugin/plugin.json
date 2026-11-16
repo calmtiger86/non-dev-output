@@ -1,7 +1,7 @@
 {
   "name": "non-dev-output",
-  "version": "1.1.0",
-  "description": "Explains tech in human language. Auto-detects confusion → analogy mode. Auto-detects writing requests → natural Korean prose. No commands needed.",
+  "version": "2.0.0",
+  "description": "Explains tech in human language. Loads a two-block rule (analogy + reality) at session start, plus skills for building analogies and polishing Korean prose. No Node.js required.",
   "author": {
     "name": "calmtiger86",
     "url": "https://github.com/calmtiger86"
