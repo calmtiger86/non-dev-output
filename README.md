@@ -94,7 +94,7 @@ claude plugin install non-dev-output --marketplace calmtiger86/non-dev-output
 
 ### Claude desktop app
 
-Click the **+** button next to the prompt box, choose **Add plugins**, add the marketplace `calmtiger86/non-dev-output`, then install non-dev-output.
+In the Code tab, click the **+** button next to the prompt box → **Plugins** → **Browse plugins**. Under **Add plugin → Add marketplace → Add from repository**, enter `calmtiger86/non-dev-output`, sync, then install non-dev-output. (Menu names were checked in the Korean UI in November 2026; the English labels may differ slightly.)
 
 > If it doesn't show up after installing, type `/reload-plugins` in the running session or restart Claude Code.
 

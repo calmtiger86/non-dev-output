@@ -94,7 +94,7 @@ claude plugin install non-dev-output --marketplace calmtiger86/non-dev-output
 
 ### Claude 데스크톱 앱
 
-프롬프트 입력창 옆의 **+** 버튼을 누르고, **Add plugins**에서 마켓 `calmtiger86/non-dev-output`을 추가한 뒤 non-dev-output을 설치합니다.
+Code 탭에서 프롬프트 입력창 옆의 **+** 버튼 → **플러그인** → **플러그인 탐색**을 엽니다. **플러그인 추가 → 마켓플레이스 추가 → 저장소에서 추가**에 `calmtiger86/non-dev-output`을 넣고 동기화한 뒤 non-dev-output을 설치합니다(2026년 11월 데스크톱 앱 한국어 화면 기준).
 
 > 설치한 뒤 반영되지 않으면, 실행 중인 세션에서 `/reload-plugins`를 입력하거나 Claude Code를 다시 시작하세요.
 

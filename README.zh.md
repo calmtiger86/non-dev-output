@@ -86,7 +86,7 @@ claude plugin install non-dev-output --marketplace calmtiger86/non-dev-output
 
 ### Claude 桌面应用
 
-点击输入框旁边的 **+** 按钮，选择 **Add plugins**，添加市场 `calmtiger86/non-dev-output`，然后安装 non-dev-output。
+在 Code 标签页中，点击输入框旁边的 **+** 按钮 → **插件** → **浏览插件**。在 **添加插件 → 添加市场 → 从仓库添加** 中输入 `calmtiger86/non-dev-output`，同步后安装 non-dev-output。（菜单名称是在 2026 年 11 月的韩语界面中确认的，中文界面可能略有不同。）
 
 > 安装后如果没有生效，在运行中的会话里输入 `/reload-plugins`，或重启 Claude Code。
 
