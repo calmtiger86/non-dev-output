@@ -53,7 +53,7 @@ Claude: ────────────────────────
 
 No command typed. The "two-block rule" is already in Claude's context from the start of the session, so when you ask again or say you didn't follow, Claude explains it in this shape.
 
-**Scenario 2 — You asked for a blog post:**
+**Scenario 2 — You asked for a blog post in Korean** (the example is translated into English here)**:**
 
 ```
 You:    "Write a blog post about why coffee makes you more productive"
@@ -72,7 +72,7 @@ With plugin:
         We call that focus.
 ```
 
-For a writing request, Claude can pick up the `ko-humanche-calmta` skill (a bundle of instructions for one kind of task) and strip out AI boilerplate. Claude decides from the request whether to use the skill, so it is not guaranteed every time. The example above is an illustration. That skill targets Korean prose.
+For a writing request, Claude can pick up the `ko-humanche-calmta` skill (a bundle of instructions for one kind of task) and strip out AI boilerplate. Claude decides from the request whether to use the skill, so it is not guaranteed every time. The example above is an illustration. The skill is written for Korean prose and its trigger words are Korean (plus "humanize"), so this scene applies to Korean requests.
 
 ---
 
@@ -112,9 +112,9 @@ When a session starts (startup · clear · compact)
 During the conversation
 ├── You say you didn't follow, or ask the same thing again
 │   └── Claude explains again as two blocks, following the rule
-├── "explain simply", "this is hard" and similar
+├── "explain simply", "analogy", "쉽게 설명해줘", "이거 어려워" and similar
 │   └── the explain-by-analogy skill helps build the analogy
-└── "polish this", "remove the AI tone", "write a blog post" and similar
+└── "다듬어줘", "AI톤 제거", "블로그 써줘", "humanize" and similar (Korean writing)
     └── the ko-humanche-calmta skill smooths Korean prose
 ```
 
@@ -174,7 +174,7 @@ node scripts/remove-legacy.mjs --apply   # backs up into the config folder's bac
 **What changed in 2.0:**
 
 - The per-message detection hook and the input log are gone. The reaction to "I didn't understand" moved into one sentence of the rule, and writing requests are handled by the trigger words of the `ko-humanche-calmta` skill.
-- The feature that skipped the rule when `~/.claude/rules/common/output-clarity.md` already existed is gone. If you keep that file yourself and also enable this plugin, the rule is loaded twice (about 3KB).
+- The feature that skipped the rule when `~/.claude/rules/common/output-clarity.md` already existed is gone. If you keep that file yourself and also enable this plugin, the rule is loaded twice (about 2.7KB).
 - Skill pre-approvals (`allowed-tools`) were narrowed. File edits and shell commands still ask for confirmation as usual, even in a turn where a skill runs.
 
 ---
