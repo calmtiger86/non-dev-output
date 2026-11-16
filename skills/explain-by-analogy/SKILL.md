@@ -1,6 +1,6 @@
 ---
+name: explain-by-analogy
 description: 기술 개념·오류·구조를 비개발자도 이해하게 하나의 일상 비유 세계로 번역해 설명한다. 두 블록(비유로 ‖ 실제로는) + 괄호 태그 매칭. "쉽게 설명", "비유로 설명", "비개발자한테", "이거 어려워", "쉽게 풀어줘", "explain simply", "analogy" 키워드 또는 사용자가 직전 설명을 "어렵다/무슨 말이야/다시"라고 할 때 발동.
-allowed-tools: Read, Write, Edit, Bash
 ---
 
 # Explain by Analogy (비유 번역 설명)
@@ -57,6 +57,3 @@ allowed-tools: Read, Write, Edit, Bash
 
 ## 보존
 사실·수치·코드·에러메시지·명령어는 비유로 바꾸지 말고 정확히 그대로(실제 블록에). 사용자가 정밀 기술정보를 원하는 맥락에선 비유 강요 안 함.
-
-## 학습 연동
-이 사용자에게 통한 "개념→비유"는 `~/.claude/rules/common/output-clarity.md`의 LEARNED-ANALOGY 섹션에 누적된다(C3 학습 루프). 거기 있는 개념은 그 비유를 우선 사용한다.
