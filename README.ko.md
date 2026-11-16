@@ -4,10 +4,9 @@
 
 ### 사람 말로 설명하는 Claude Code 플러그인
 
-[![Version](https://img.shields.io/badge/version-1.0.0-6c63ff.svg?style=flat-square)](https://github.com/calmtiger86/non-dev-output/releases)
+[![Version](https://img.shields.io/badge/version-2.0.0-6c63ff.svg?style=flat-square)](https://github.com/calmtiger86/non-dev-output/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-22c55e.svg?style=flat-square)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316.svg?style=flat-square)](https://claude.ai/code)
-[![Platform](https://img.shields.io/badge/platform-Mac%20%7C%20Linux%20%7C%20Windows-0ea5e9.svg?style=flat-square)](#설치)
 
 **한국어 · [English](README.md) · [中文](README.zh.md)**
 
@@ -28,7 +27,7 @@ Claude는 똑똑합니다. 그런데 "왜 앱이 느려요?"라고 물으면 이
 
 더 모르는 채로 화면을 닫습니다.
 
-**non-dev-output**은 Claude가 첫 글자를 타이핑하기 전에 개입합니다. 자동으로.
+**non-dev-output**은 Claude가 설명하는 방식 자체를 바꿉니다. 어려운 말을 일상의 장면으로 옮겨 먼저 보여 주고, 정확한 기술 내용은 따로 모아 둡니다.
 
 ---
 
@@ -53,7 +52,7 @@ Claude: ────────────────────────
         읽기보다 쓰기가 잦은 컬럼에는 만들지 않는 편이 낫습니다.
 ```
 
-명령 없음. "이해가 안 돼요"를 잡아서 비유 모드로 전환했습니다.
+명령은 필요 없습니다. 세션이 시작될 때 "두 블록 규칙"이 Claude에게 전달되어 있기 때문에, 같은 것을 다시 묻거나 이해하지 못했다고 하면 Claude가 이 모양으로 다시 설명합니다.
 
 **상황 2 — 블로그 글을 써달라고 했을 때:**
 
@@ -73,90 +72,110 @@ Claude: ────────────────────────
         그걸 우리는 집중력이라고 부릅니다.
 ```
 
-역시 명령 없음. 글쓰기 요청을 감지하고 AI 상투어를 걷어냈습니다.
+글쓰기 요청이면 Claude가 `ko-humanche-calmta` 스킬(특정 작업용 지침 묶음)을 불러 AI 상투어를 걷어내고 씁니다. 스킬을 부를지는 Claude가 요청 내용을 보고 판단하므로, 매번 반드시 불리는 것은 아닙니다. 위 예시는 이해를 돕기 위한 장면입니다.
 
 ---
 
 ## 설치
 
-### 방법 A — `claude plugin`으로 설치 (Claude Code CLI가 있는 경우 권장)
+non-dev-output은 Claude Code 플러그인(기능을 덧붙이는 확장 묶음)입니다. 플러그인을 내려받는 목록인 마켓플레이스 `calmtiger86/non-dev-output`에서 설치합니다. 쓰는 곳에 맞는 방법 하나만 고르세요.
 
-```bash
-claude plugin marketplace add https://github.com/calmtiger86/non-dev-output
-claude plugin install non-dev-output@non-dev-output
+### Claude Code 안에서 (v2.1.275 이상)
+
+```
+/plugin install non-dev-output --marketplace calmtiger86/non-dev-output
 ```
 
-Claude Code 재시작. 끝.
-
-### 방법 B — `omc install`로 설치 (oh-my-claudecode 사용 시)
+### 터미널에서 (v2.1.292 이상)
 
 ```bash
-omc install https://github.com/calmtiger86/non-dev-output
+claude plugin install non-dev-output --marketplace calmtiger86/non-dev-output
 ```
 
-Claude Code 재시작. 끝.
+### Claude 데스크톱 앱
 
-### 방법 C — 직접 설치 (어디서나 동작)
+프롬프트 입력창 옆의 **+** 버튼을 누르고, **Add plugins**에서 마켓 `calmtiger86/non-dev-output`을 추가한 뒤 non-dev-output을 설치합니다.
 
-**1단계** — [Node.js](https://nodejs.org)가 설치돼 있는지 확인합니다 (버전 18 이상).  
-터미널에서 `node --version`을 실행해서 버전이 나오면 준비 완료입니다.
+> 설치한 뒤 반영되지 않으면, 실행 중인 세션에서 `/reload-plugins`를 입력하거나 Claude Code를 다시 시작하세요.
 
-**2단계** — 이 저장소를 내려받습니다:
-
-```bash
-git clone https://github.com/calmtiger86/non-dev-output
-cd non-dev-output
-```
-
-**3단계** — 설치 스크립트를 실행합니다:
-
-```bash
-node install.js
-```
-
-**4단계** — Claude Code를 재시작합니다. 끝.
-
-> npm install 없음. 설정 파일 없음. API 키 없음.
+**Node.js는 없어도 됩니다.** 세션을 시작할 때 규칙을 불러오는 훅(정해진 시점에 자동으로 실행되는 작은 명령)이 `cat` 명령 한 줄이기 때문입니다. 명령 뒤에 `exit 0`이 붙어 있어서 규칙 파일을 못 읽는 경우에도 오류 줄이 보이지 않습니다. 이 동작은 macOS에서 확인했고, Git Bash가 없는 Windows(PowerShell)에서는 아직 확인하지 못했습니다.
 
 ---
 
-## 자동 감지 키워드
-
-아래 말이 들어오면 플러그인이 반응합니다. 따로 명령하지 않아도 됩니다.
-
-**이해 못 했을 때:**
-
-| 입력 | 언어 |
-|------|------|
-| "이해가 안 돼", "무슨 말이야", "쉽게 설명해줘" | 한국어 |
-| "뭔 뜻이야", "다시 설명해줘", "더 쉽게" | 한국어 |
-| "I don't understand", "what does that mean" | 영어 |
-| "什么意思", "看不懂" | 중국어 |
-
-**글쓰기를 부탁했을 때:**
-
-| 입력 | 언어 |
-|------|------|
-| "블로그 써줘", "카드뉴스 만들어줘" | 한국어 |
-| "뉴스레터 작성해줘", "인스타 포스트" | 한국어 |
-| "기고문 써줘", "칼럼 초안 잡아줘" | 한국어 |
-
----
-
-## 동작 원리
+## 동작 방식
 
 ```
-세션 시작할 때마다
-└── "두 블록 규칙"을 Claude 대화에 자동 주입
+세션이 시작될 때 (startup · clear · compact)
+└── "두 블록 규칙"(rules/output-clarity.md)을 Claude의 대화에 넣습니다
     (비유 블록 + 실제 블록, 섞지 않음)
 
-메시지를 보낼 때마다
-└── 혼란 신호 또는 글쓰기 신호 감지
-    ├── 혼란 감지 → [CLARITY-MISS] 지시 주입
-    └── 글쓰기 감지 → [WRITING-INTENT] 지시 주입
+대화하는 동안
+├── 이해하지 못했다고 하거나 같은 것을 다시 물으면
+│   └── 규칙에 따라 비유 두 블록으로 다시 설명합니다
+├── "쉽게 설명해줘", "이거 어려워" 같은 말이 오면
+│   └── explain-by-analogy 스킬이 비유 구성을 도와줍니다
+└── "다듬어줘", "AI톤 제거", "블로그 써줘" 같은 말이 오면
+    └── ko-humanche-calmta 스킬이 한국어 글을 자연스럽게 고칩니다
 ```
 
-핵심 설계 원칙: **오탐 제로**. 글쓰기 감지는 종류(블로그, 뉴스레터…)와 부탁(써줘, 작성해줘…)이 같이 있어야 발동합니다. "블로그에서 봤는데"처럼 단순 언급에는 반응하지 않습니다.
+메시지를 보낼 때마다 도는 감지 훅은 없습니다. 입력한 글을 읽거나 기록하는 부분이 없고, 기록 파일도 만들지 않습니다.
+
+스킬은 Claude가 요청에 맞는지 판단해서 불러 쓰며, 직접 부르려면 `/explain-by-analogy` 또는 `/ko-humanche-calmta`를 입력합니다. 다른 플러그인에 같은 이름이 있으면 `/non-dev-output:explain-by-analogy`처럼 플러그인 이름을 앞에 붙이세요.
+
+---
+
+## 업데이트와 제거
+
+### 업데이트
+
+- 이 마켓은 자동 업데이트가 기본으로 꺼져 있습니다. `/plugin`을 입력하고 Marketplaces 탭에서 이 마켓의 자동 업데이트를 켜 두면 새 버전을 자동으로 받습니다.
+- 직접 받으려면 터미널에서 아래 명령을 실행합니다.
+
+```bash
+claude plugin update non-dev-output@non-dev-output
+```
+
+- 이미 실행 중인 세션에서는 `/reload-plugins`를 입력해야 새 버전이 적용됩니다.
+
+### 제거
+
+```bash
+claude plugin uninstall non-dev-output@non-dev-output
+```
+
+---
+
+## 1.x에서 옮기기
+
+2.0부터 설치는 위의 마켓 방법 하나뿐입니다. 예전의 `omc install`, `install.js`(방법 C) 설치는 없어졌습니다. 1.x를 쓰던 분은 아래 순서로 옮기세요.
+
+1. 위의 [설치](#설치) 방법으로 2.0을 설치합니다.
+2. 아래 정리 도구로 예전 흔적을 지웁니다. 정리 도구를 실행하려면 Node.js가 필요합니다.
+3. Claude Code를 다시 시작합니다.
+
+**정리 도구가 지우는 것:**
+
+- `install.js`(방법 C)로 설치했다면, `~/.claude/plugins/non-dev-output/` 폴더와 `~/.claude/settings.json`에 적힌 이 플러그인의 훅 항목. 다른 훅은 그대로 둡니다.
+- 1.x 훅이 남긴 `~/.omc/state/clarity-events.jsonl`(메시지 앞 200자 기록)과 `~/.omc/state/clarity-claims/`. 마켓으로 설치했어도 이 기록은 남아 있을 수 있습니다.
+
+```bash
+# 예전에 내려받은 폴더가 있으면 git pull, 없으면 아래 두 줄
+git clone https://github.com/calmtiger86/non-dev-output
+cd non-dev-output
+
+node scripts/remove-legacy.mjs           # 미리보기: 무엇을 지울지 보여 주기만 합니다
+node scripts/remove-legacy.mjs --apply   # 설정 폴더의 backups에 백업한 뒤 정리합니다
+```
+
+- 설정 폴더를 `CLAUDE_CONFIG_DIR`로 옮겨 쓰는 경우에도 그 폴더를 따릅니다.
+- `settings.json`을 읽지 못하면(쉼표 하나가 틀렸을 때 등) `settings.json`과 예전 폴더를 건드리지 않고 알려 줍니다. 고친 뒤 다시 실행하세요.
+- 메시지 기록 파일에는 입력한 글의 앞부분이 그대로 들어 있을 수 있어, 백업에도 사본(`omc-state` 폴더)이 남습니다. 필요 없으면 그 폴더를 지우세요.
+
+**2.0에서 달라진 점:**
+
+- 메시지를 보낼 때마다 도는 감지 훅과 입력 기록이 없어졌습니다. 이해하지 못했다는 말에 대한 대응은 규칙의 한 문장으로 옮겼고, 글쓰기 요청은 `ko-humanche-calmta` 스킬의 발동 낱말이 맡습니다.
+- 세션을 시작할 때 `~/.claude/rules/common/output-clarity.md`가 이미 있으면 규칙을 건너뛰던 기능이 없어졌습니다. 그 파일을 직접 두고 이 플러그인도 켜면 규칙이 두 번 들어갑니다(약 3KB).
+- 스킬의 사전 승인(`allowed-tools`)을 줄였습니다. 스킬이 불린 턴에도 파일 수정이나 셸 명령은 평소처럼 확인 창을 거칩니다.
 
 ---
 
@@ -164,31 +183,37 @@ node install.js
 
 ```
 non-dev-output/
+├── .claude-plugin/
+│   ├── plugin.json              ← 플러그인 정보
+│   └── marketplace.json         ← 마켓 정보
 ├── hooks/
-│   ├── hooks.json               ← 설치 시 자동 등록
-│   ├── session-start.mjs        ← 세션 시작 시 규칙 로드
-│   └── clarity-keywords.mjs    ← 패턴 감지 (자체 완결)
+│   ├── hooks.json               ← 세션 시작 때 규칙을 넣는 훅 (cat 한 줄)
+│   └── hooks.test.mjs           ← 훅 명령 점검
 ├── rules/
-│   └── output-clarity.md       ← 두 블록 규칙
+│   └── output-clarity.md        ← 두 블록 규칙
 ├── skills/
-│   ├── explain-by-analogy/      ← 비유 구성 심층 스킬
+│   ├── explain-by-analogy/      ← 비유 구성 스킬
 │   └── ko-humanche-calmta/      ← 한국어 산문 보정 스킬
-├── install.js                   ← 크로스 플랫폼 설치 스크립트
-├── install.sh                   ← Mac/Linux 단축 실행
-└── install.ps1                  ← Windows 단축 실행
+└── scripts/
+    ├── remove-legacy.mjs        ← 1.x 흔적 정리 도구
+    └── remove-legacy.test.mjs   ← 정리 도구 점검
 ```
 
 ---
 
-## 제거
+## 기여
+
+버그 신고나 개선 제안은 언제든 환영합니다.
+
+**점검 실행.** 고친 뒤에는 저장소 폴더에서 아래 명령으로 점검합니다.
 
 ```bash
-# 플러그인 파일 삭제
-rm -rf ~/.claude/plugins/non-dev-output
-
-# ~/.claude/settings.json 을 열어서
-# "hooks" 섹션 안에 "non-dev-output" 경로가 들어간 두 항목을 삭제합니다.
+node hooks/hooks.test.mjs
+node scripts/remove-legacy.test.mjs
+claude plugin validate .
 ```
+
+**고친 내용을 배포하려면** `.claude-plugin/plugin.json`과 `.claude-plugin/marketplace.json`에 있는 `version`을 모두 같은 새 번호로 올려야 합니다. 번호가 그대로면 사용자가 업데이트해도 "이미 최신"이라고 나오고 새 내용을 받지 못합니다.
 
 ---
 

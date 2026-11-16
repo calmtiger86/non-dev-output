@@ -4,10 +4,9 @@
 
 ### A Claude Code plugin that speaks human, not compiler.
 
-[![Version](https://img.shields.io/badge/version-1.0.0-6c63ff.svg?style=flat-square)](https://github.com/calmtiger86/non-dev-output/releases)
+[![Version](https://img.shields.io/badge/version-2.0.0-6c63ff.svg?style=flat-square)](https://github.com/calmtiger86/non-dev-output/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-22c55e.svg?style=flat-square)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316.svg?style=flat-square)](https://claude.ai/code)
-[![Platform](https://img.shields.io/badge/platform-Mac%20%7C%20Linux%20%7C%20Windows-0ea5e9.svg?style=flat-square)](#installation)
 
 **[한국어](README.ko.md) · English · [中文](README.zh.md)**
 
@@ -28,7 +27,7 @@ Claude is smart. But ask *"why is my app slow?"* and you get:
 
 You close the tab knowing less than before.
 
-**non-dev-output** steps in before Claude types a single word. Automatically.
+**non-dev-output** changes how Claude explains things. It turns the hard words into an everyday scene first, and keeps the exact technical details in a separate block.
 
 ---
 
@@ -52,7 +51,7 @@ Claude: ────────────────────────
         Only index columns you read often — indexes slow down writes.
 ```
 
-No command typed. The plugin caught *"I still don't get"* and switched modes.
+No command typed. The "two-block rule" is already in Claude's context from the start of the session, so when you ask again or say you didn't follow, Claude explains it in this shape.
 
 **Scenario 2 — You asked for a blog post:**
 
@@ -73,90 +72,110 @@ With plugin:
         We call that focus.
 ```
 
-No command. The plugin detected a writing request and cut the boilerplate.
+For a writing request, Claude can pick up the `ko-humanche-calmta` skill (a bundle of instructions for one kind of task) and strip out AI boilerplate. Claude decides from the request whether to use the skill, so it is not guaranteed every time. The example above is an illustration. That skill targets Korean prose.
 
 ---
 
 ## Installation
 
-### Option A — via `claude plugin` (recommended)
+non-dev-output is a Claude Code plugin. Install it from the marketplace (the list plugins are downloaded from) `calmtiger86/non-dev-output`. Pick the one way that fits where you work.
 
-```bash
-claude plugin marketplace add https://github.com/calmtiger86/non-dev-output
-claude plugin install non-dev-output@non-dev-output
+### Inside Claude Code (v2.1.275 or later)
+
+```
+/plugin install non-dev-output --marketplace calmtiger86/non-dev-output
 ```
 
-Restart Claude Code. Done.
-
-### Option B — via `omc install` (if you use oh-my-claudecode)
+### In a terminal (v2.1.292 or later)
 
 ```bash
-omc install https://github.com/calmtiger86/non-dev-output
+claude plugin install non-dev-output --marketplace calmtiger86/non-dev-output
 ```
 
-Restart Claude Code. Done.
+### Claude desktop app
 
-### Option C — manual (works everywhere)
+Click the **+** button next to the prompt box, choose **Add plugins**, add the marketplace `calmtiger86/non-dev-output`, then install non-dev-output.
 
-**Step 1** — Make sure [Node.js](https://nodejs.org) is installed (v18 or higher).  
-Run `node --version` in a terminal. If a version number appears, you're ready.
+> If it doesn't show up after installing, type `/reload-plugins` in the running session or restart Claude Code.
 
-**Step 2** — Clone this repository:
-
-```bash
-git clone https://github.com/calmtiger86/non-dev-output
-cd non-dev-output
-```
-
-**Step 3** — Run the installer:
-
-```bash
-node install.js
-```
-
-**Step 4** — Restart Claude Code. Done.
-
-> No npm install. No config files. No API keys.
-
----
-
-## Trigger Words
-
-The plugin watches for these — no commands needed.
-
-**When you're confused:**
-
-| What you type | Language |
-|---------------|----------|
-| "I don't understand", "what does that mean", "explain simply" | English |
-| "이해가 안 돼", "무슨 말이야", "쉽게 설명해줘" | Korean |
-| "什么意思", "看不懂", "简单说一下" | Chinese |
-| "too technical", "what?", "explain it again" | English |
-
-**When you're writing:**
-
-| What you type | Language |
-|---------------|----------|
-| "write a blog post / newsletter / caption" | English |
-| "블로그 써줘", "카드뉴스 만들어줘", "뉴스레터 작성해줘" | Korean |
-| "写博客", "写公众号文章", "写小红书" | Chinese |
+**Node.js is not required.** The hook that loads the rule at session start (a small command Claude Code runs automatically at a set moment) is a single `cat` line. It ends with `exit 0`, so no error line appears even if the rule file can't be read. This was checked on macOS; it has not been checked on Windows without Git Bash (PowerShell).
 
 ---
 
 ## How It Works
 
 ```
-Every session start
-└── Loads the "two-block rule" into Claude's context
+When a session starts (startup · clear · compact)
+└── Loads the "two-block rule" (rules/output-clarity.md) into Claude's context
     (analogy block + reality block, no mixing)
 
-Every message you send
-└── Scans for confusion or writing signals
-    ├── Confusion detected → injects [CLARITY-MISS] instruction
-    └── Writing detected  → injects [WRITING-INTENT] instruction
+During the conversation
+├── You say you didn't follow, or ask the same thing again
+│   └── Claude explains again as two blocks, following the rule
+├── "explain simply", "this is hard" and similar
+│   └── the explain-by-analogy skill helps build the analogy
+└── "polish this", "remove the AI tone", "write a blog post" and similar
+    └── the ko-humanche-calmta skill smooths Korean prose
 ```
 
-Key design: **no false positives**. Writing mode needs both a subject (blog, newsletter…) and an action (write, draft…) in the same message. Casually mentioning a blog won't set it off.
+There is no hook that runs on every message you send. Nothing reads or records what you type, and the plugin creates no log files.
+
+Claude decides whether a skill fits the request. To call one yourself, type `/explain-by-analogy` or `/ko-humanche-calmta`. If another plugin has a skill with the same name, put the plugin name in front: `/non-dev-output:explain-by-analogy`.
+
+---
+
+## Update and Uninstall
+
+### Update
+
+- This marketplace has auto-update off by default. Type `/plugin`, open the Marketplaces tab, and turn on auto-update for this marketplace to receive new versions automatically.
+- To update by hand, run this in a terminal:
+
+```bash
+claude plugin update non-dev-output@non-dev-output
+```
+
+- In a session that is already running, type `/reload-plugins` to apply the new version.
+
+### Uninstall
+
+```bash
+claude plugin uninstall non-dev-output@non-dev-output
+```
+
+---
+
+## Moving from 1.x
+
+From 2.0 on, installing from the marketplace is the only way. The older `omc install` and `install.js` (Option C) routes are gone. If you used 1.x, move over like this:
+
+1. Install 2.0 with one of the methods above.
+2. Clean up the old leftovers with the tool below. It needs Node.js.
+3. Restart Claude Code.
+
+**What the cleanup tool removes:**
+
+- If you installed with `install.js` (Option C): the `~/.claude/plugins/non-dev-output/` folder, and this plugin's hook entries in `~/.claude/settings.json`. Your other hooks are left alone.
+- The files 1.x hooks left behind: `~/.omc/state/clarity-events.jsonl` (the first 200 characters of your messages) and `~/.omc/state/clarity-claims/`. These may exist even if you installed from the marketplace.
+
+```bash
+# If you still have the old download folder, run git pull; otherwise these two lines
+git clone https://github.com/calmtiger86/non-dev-output
+cd non-dev-output
+
+node scripts/remove-legacy.mjs           # preview: only shows what would be removed
+node scripts/remove-legacy.mjs --apply   # backs up into the config folder's backups, then cleans up
+```
+
+- It follows `CLAUDE_CONFIG_DIR` if you moved your config folder.
+- If `settings.json` can't be read (for example one stray comma), the tool leaves `settings.json` and the old folder untouched and tells you. Fix the file and run it again.
+- The message log can contain the beginning of what you typed, in plain text, so the backup keeps a copy too (the `omc-state` folder). Delete that folder if you don't need it.
+
+**What changed in 2.0:**
+
+- The per-message detection hook and the input log are gone. The reaction to "I didn't understand" moved into one sentence of the rule, and writing requests are handled by the trigger words of the `ko-humanche-calmta` skill.
+- The feature that skipped the rule when `~/.claude/rules/common/output-clarity.md` already existed is gone. If you keep that file yourself and also enable this plugin, the rule is loaded twice (about 3KB).
+- Skill pre-approvals (`allowed-tools`) were narrowed. File edits and shell commands still ask for confirmation as usual, even in a turn where a skill runs.
 
 ---
 
@@ -164,31 +183,37 @@ Key design: **no false positives**. Writing mode needs both a subject (blog, new
 
 ```
 non-dev-output/
+├── .claude-plugin/
+│   ├── plugin.json              ← plugin info
+│   └── marketplace.json         ← marketplace info
 ├── hooks/
-│   ├── hooks.json               ← auto-registers on install
-│   ├── session-start.mjs        ← loads rules at session start
-│   └── clarity-keywords.mjs    ← pattern detection (self-contained)
+│   ├── hooks.json               ← loads the rule at session start (one cat line)
+│   └── hooks.test.mjs           ← checks the hook command
 ├── rules/
-│   └── output-clarity.md       ← the two-block rule
+│   └── output-clarity.md        ← the two-block rule
 ├── skills/
-│   ├── explain-by-analogy/      ← extended analogy skill
+│   ├── explain-by-analogy/      ← analogy-building skill
 │   └── ko-humanche-calmta/      ← Korean prose correction skill
-├── install.js                   ← cross-platform installer
-├── install.sh                   ← Mac/Linux shortcut
-└── install.ps1                  ← Windows shortcut
+└── scripts/
+    ├── remove-legacy.mjs        ← cleanup tool for 1.x leftovers
+    └── remove-legacy.test.mjs   ← checks the cleanup tool
 ```
 
 ---
 
-## Uninstall
+## Contributing
+
+Bug reports and suggestions are always welcome.
+
+**Run the checks.** After a change, run these in the repository folder:
 
 ```bash
-# Remove plugin files
-rm -rf ~/.claude/plugins/non-dev-output
-
-# Open ~/.claude/settings.json and delete the two entries
-# under "hooks" that reference "non-dev-output".
+node hooks/hooks.test.mjs
+node scripts/remove-legacy.test.mjs
+claude plugin validate .
 ```
+
+**To ship a change,** raise `version` in both `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json` to the same new number. If the number stays the same, users who update are told they are "already up to date" and never receive the new content.
 
 ---
 
