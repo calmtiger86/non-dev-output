@@ -1,5 +1,5 @@
 {
-  "description": "비개발자 친화 출력 + 한국어 글쓰기 보정 훅",
+  "description": "비개발자 친화 출력 규칙을 세션이 시작될 때 주입",
   "hooks": {
     "SessionStart": [
       {
@@ -7,17 +7,6 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PLUGIN_ROOT/hooks/session-start.mjs\""
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PLUGIN_ROOT/hooks/clarity-keywords.mjs\"",
-            "timeout": 5
           }
         ]
       }
