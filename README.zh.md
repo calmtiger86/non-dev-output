@@ -52,7 +52,7 @@ Claude: ────────────────────────
         只给查询频繁的列建索引——索引对写入有维护成本。
 ```
 
-不需要输入任何命令。会话一开始，"双块规则"就已经交给了 Claude，所以当你再问一次、或者说没听懂时，Claude 会用这个格式重新讲解。
+不需要输入任何命令。会话一开始，"双块规则"就会交给 Claude，规则里有一句话：当你再问一次、或者说没听懂时，要用这个格式重新讲解。Claude 是按规则来做，而不是固定脚本，所以每次的结果不一定完全一样。
 
 **场景二——你要写一篇韩语博客（这里翻译成中文示意）：**
 
@@ -139,24 +139,33 @@ claude plugin uninstall non-dev-output@non-dev-output
 
 ## 从 1.x 迁移
 
-从 2.0 开始，只能通过插件市场安装。之前的 `omc install` 和 `install.js`（方式 C）都已取消。用过 1.x 的话，请按下面的步骤迁移：
+从 2.0 开始，只能通过插件市场安装。旧 README 里的 `omc install` 说明已删除，`install.js`（方式 C）也已取消。用过 1.x 的话，请按下面的步骤迁移：
 
-1. 用上面的方式安装 2.0。
+1. 获取 2.0。
+   - 如果你是从市场安装的：它已经装好了，所以不要用安装命令，而是在终端运行 `claude plugin update non-dev-output@non-dev-output`。
+   - 如果你用 `install.js`（方式 C）安装过：用上面的方式安装 2.0。
 2. 用下面的清理工具删除旧版本的残留。运行它需要 Node.js。
 3. 重启 Claude Code。
 
 **清理工具会删除：**
 
-- 如果你用 `install.js`（方式 C）安装过：`~/.claude/plugins/non-dev-output/` 文件夹，以及 `~/.claude/settings.json` 里属于本插件的钩子条目。其他钩子不会动。
+- 如果你用 `install.js`（方式 C）安装过：`~/.claude/plugins/non-dev-output/` 文件夹，以及 `~/.claude/settings.json` 里属于本插件的钩子条目。只删除与 `install.js` 写入的格式（`node "…/plugins/non-dev-output/hooks/….mjs"`）完全一致的条目。格式哪怕有一点不同的钩子都不会删，并会告诉你那是什么命令。
 - 1.x 的钩子留下的 `~/.omc/state/clarity-events.jsonl`（消息的前 200 个字符）和 `~/.omc/state/clarity-claims/`。即使你是从市场安装的，这些文件也可能存在。
 
-```bash
-# 如果还留着以前下载的文件夹，运行 git pull；否则运行下面两行
-git clone https://github.com/calmtiger86/non-dev-output
-cd non-dev-output
+如果你已安装或更新到 2.0，清理工具就在市场副本里。
 
-node scripts/remove-legacy.mjs           # 预览：只显示会删除什么
-node scripts/remove-legacy.mjs --apply   # 先备份到配置文件夹的 backups，再清理
+```bash
+node ~/.claude/plugins/marketplaces/non-dev-output/scripts/remove-legacy.mjs           # 预览：只显示会删除什么
+node ~/.claude/plugins/marketplaces/non-dev-output/scripts/remove-legacy.mjs --apply   # 先备份到配置文件夹的 backups，再清理
+```
+
+如果那个路径下没有文件，或者你的命令行不认识 `~`（比如 Windows 命令提示符），就把仓库下载到一个新文件夹，再用同样的命令：
+
+```bash
+git clone https://github.com/calmtiger86/non-dev-output non-dev-output-cleanup
+cd non-dev-output-cleanup
+node scripts/remove-legacy.mjs           # 预览
+node scripts/remove-legacy.mjs --apply   # 先备份，再清理
 ```
 
 - 如果你用 `CLAUDE_CONFIG_DIR` 改了配置文件夹，工具会跟随该文件夹。

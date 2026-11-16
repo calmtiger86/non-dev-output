@@ -51,7 +51,7 @@ Claude: ────────────────────────
         Only index columns you read often — indexes slow down writes.
 ```
 
-No command typed. The "two-block rule" is already in Claude's context from the start of the session, so when you ask again or say you didn't follow, Claude explains it in this shape.
+No command typed. The "two-block rule" is loaded into Claude's context at the start of the session, and it includes a sentence saying that when you ask again or say you didn't follow, Claude should explain it again in this shape. Claude follows the rule rather than a fixed script, so the result may not be identical every time.
 
 **Scenario 2 — You asked for a blog post in Korean** (the example is translated into English here)**:**
 
@@ -147,24 +147,33 @@ claude plugin uninstall non-dev-output@non-dev-output
 
 ## Moving from 1.x
 
-From 2.0 on, installing from the marketplace is the only way. The older `omc install` and `install.js` (Option C) routes are gone. If you used 1.x, move over like this:
+From 2.0 on, installing from the marketplace is the only way. The `omc install` instructions from the old README were removed, and the `install.js` (Option C) route is gone. If you used 1.x, move over like this:
 
-1. Install 2.0 with one of the methods above.
+1. Get 2.0.
+   - If you installed from the marketplace: it is already installed, so instead of the install command run `claude plugin update non-dev-output@non-dev-output` in a terminal.
+   - If you installed with `install.js` (Option C): install 2.0 with one of the methods above.
 2. Clean up the old leftovers with the tool below. It needs Node.js.
 3. Restart Claude Code.
 
 **What the cleanup tool removes:**
 
-- If you installed with `install.js` (Option C): the `~/.claude/plugins/non-dev-output/` folder, and this plugin's hook entries in `~/.claude/settings.json`. Your other hooks are left alone.
+- If you installed with `install.js` (Option C): the `~/.claude/plugins/non-dev-output/` folder, and this plugin's hook entries in `~/.claude/settings.json`. It only removes entries that are exactly the shape `install.js` wrote (`node "…/plugins/non-dev-output/hooks/….mjs"`). A hook whose shape differs even slightly is left alone, and the tool tells you which command it is.
 - The files 1.x hooks left behind: `~/.omc/state/clarity-events.jsonl` (the first 200 characters of your messages) and `~/.omc/state/clarity-claims/`. These may exist even if you installed from the marketplace.
 
-```bash
-# If you still have the old download folder, run git pull; otherwise these two lines
-git clone https://github.com/calmtiger86/non-dev-output
-cd non-dev-output
+If you installed or updated to 2.0, the cleanup tool is already in the marketplace copy.
 
-node scripts/remove-legacy.mjs           # preview: only shows what would be removed
-node scripts/remove-legacy.mjs --apply   # backs up into the config folder's backups, then cleans up
+```bash
+node ~/.claude/plugins/marketplaces/non-dev-output/scripts/remove-legacy.mjs           # preview: only shows what would be removed
+node ~/.claude/plugins/marketplaces/non-dev-output/scripts/remove-legacy.mjs --apply   # backs up into the config folder's backups, then cleans up
+```
+
+If that file isn't there, or `~` doesn't work in your shell (for example Windows Command Prompt), download the repository into a new folder and use the same commands:
+
+```bash
+git clone https://github.com/calmtiger86/non-dev-output non-dev-output-cleanup
+cd non-dev-output-cleanup
+node scripts/remove-legacy.mjs           # preview
+node scripts/remove-legacy.mjs --apply   # back up, then clean up
 ```
 
 - It follows `CLAUDE_CONFIG_DIR` if you moved your config folder.

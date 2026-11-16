@@ -52,7 +52,7 @@ Claude: ────────────────────────
         읽기보다 쓰기가 잦은 컬럼에는 만들지 않는 편이 낫습니다.
 ```
 
-명령은 필요 없습니다. 세션이 시작될 때 "두 블록 규칙"이 Claude에게 전달되어 있기 때문에, 같은 것을 다시 묻거나 이해하지 못했다고 하면 Claude가 이 모양으로 다시 설명합니다.
+명령은 필요 없습니다. 세션이 시작될 때 "두 블록 규칙"이 Claude에게 전달되고, 그 규칙에 "같은 것을 다시 묻거나 이해하지 못했다고 하면 이 모양으로 다시 설명한다"는 문장이 들어 있습니다. Claude가 규칙을 따르는 방식이라 매번 똑같이 되지는 않을 수 있습니다.
 
 **상황 2 — 블로그 글을 써달라고 했을 때:**
 
@@ -147,24 +147,33 @@ claude plugin uninstall non-dev-output@non-dev-output
 
 ## 1.x에서 옮기기
 
-2.0부터 설치는 위의 마켓 방법 하나뿐입니다. 예전의 `omc install`, `install.js`(방법 C) 설치는 없어졌습니다. 1.x를 쓰던 분은 아래 순서로 옮기세요.
+2.0부터 설치는 위의 마켓 방법 하나뿐입니다. 예전 README에 있던 `omc install` 안내는 지웠고, `install.js`(방법 C) 설치는 없어졌습니다. 1.x를 쓰던 분은 아래 순서로 옮기세요.
 
-1. 위의 [설치](#설치) 방법으로 2.0을 설치합니다.
+1. 2.0을 받습니다.
+   - 마켓으로 설치해 쓰던 분: 이미 설치되어 있으므로 설치 명령 대신 터미널에서 `claude plugin update non-dev-output@non-dev-output`를 실행합니다.
+   - `install.js`(방법 C)로 설치해 쓰던 분: 위의 [설치](#설치) 방법으로 2.0을 설치합니다.
 2. 아래 정리 도구로 예전 흔적을 지웁니다. 정리 도구를 실행하려면 Node.js가 필요합니다.
 3. Claude Code를 다시 시작합니다.
 
 **정리 도구가 지우는 것:**
 
-- `install.js`(방법 C)로 설치했다면, `~/.claude/plugins/non-dev-output/` 폴더와 `~/.claude/settings.json`에 적힌 이 플러그인의 훅 항목. 다른 훅은 그대로 둡니다.
+- `install.js`(방법 C)로 설치했다면, `~/.claude/plugins/non-dev-output/` 폴더와 `~/.claude/settings.json`에 적힌 이 플러그인의 훅 항목. `install.js`가 적은 모양(`node "…/plugins/non-dev-output/hooks/….mjs"`)과 똑같은 항목만 지웁니다. 모양이 조금이라도 다른 훅은 지우지 않고 어떤 명령인지 알려 줍니다.
 - 1.x 훅이 남긴 `~/.omc/state/clarity-events.jsonl`(메시지 앞 200자 기록)과 `~/.omc/state/clarity-claims/`. 마켓으로 설치했어도 이 기록은 남아 있을 수 있습니다.
 
-```bash
-# 예전에 내려받은 폴더가 있으면 git pull, 없으면 아래 두 줄
-git clone https://github.com/calmtiger86/non-dev-output
-cd non-dev-output
+2.0을 설치하거나 업데이트했다면 정리 도구가 마켓 사본에 들어 있습니다.
 
-node scripts/remove-legacy.mjs           # 미리보기: 무엇을 지울지 보여 주기만 합니다
-node scripts/remove-legacy.mjs --apply   # 설정 폴더의 backups에 백업한 뒤 정리합니다
+```bash
+node ~/.claude/plugins/marketplaces/non-dev-output/scripts/remove-legacy.mjs           # 미리보기: 무엇을 지울지 보여 주기만 합니다
+node ~/.claude/plugins/marketplaces/non-dev-output/scripts/remove-legacy.mjs --apply   # 설정 폴더의 backups에 백업한 뒤 정리합니다
+```
+
+그 경로에 파일이 없거나 `~`가 통하지 않는 환경(Windows 명령 프롬프트 등)이면, 저장소를 새 폴더에 내려받아 같은 명령을 씁니다.
+
+```bash
+git clone https://github.com/calmtiger86/non-dev-output non-dev-output-cleanup
+cd non-dev-output-cleanup
+node scripts/remove-legacy.mjs           # 미리보기
+node scripts/remove-legacy.mjs --apply   # 백업한 뒤 정리
 ```
 
 - 설정 폴더를 `CLAUDE_CONFIG_DIR`로 옮겨 쓰는 경우에도 그 폴더를 따릅니다.
