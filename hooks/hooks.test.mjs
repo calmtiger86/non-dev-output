@@ -15,7 +15,7 @@ const rules = readFileSync(join(ROOT, 'rules', 'output-clarity.md'), 'utf8');
 
 // PATH에 sh와 cat만 있는 환경(= Node가 없는 컴퓨터)에서 명령을 돌린다.
 const bin = mkdtempSync(join(tmpdir(), 'ndo-bin-'));
-symlinkSync('/bin/cat', join(bin, 'cat'));
+if (process.platform !== 'win32') symlinkSync('/bin/cat', join(bin, 'cat')); // 링크 시험은 Windows에서 건너뜀
 const runHook = (pluginRoot) =>
   spawnSync('/bin/sh', ['-c', command], { env: { PATH: bin, CLAUDE_PLUGIN_ROOT: pluginRoot }, encoding: 'utf8' });
 
