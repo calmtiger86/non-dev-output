@@ -13,42 +13,51 @@ import { fileURLToPath } from 'node:url';
 const SCRIPT = join(dirname(fileURLToPath(import.meta.url)), 'remove-legacy.mjs');
 const base = realpathSync(mkdtempSync(join(tmpdir(), 'ndo-remove-')));
 
-const OUR_SESSION = { type: 'command', command: 'node "/Users/x/.claude/plugins/non-dev-output/hooks/session-start.mjs"' };
-const OUR_SESSION_WIN = { type: 'command', command: 'node "C:\\Users\\x\\.claude\\plugins\\non-dev-output\\hooks\\session-start.mjs"' };
-const OUR_PROMPT = { type: 'command', command: 'node "/Users/x/.claude/plugins/non-dev-output/hooks/clarity-keywords.mjs"', timeout: 5 };
 const OTHER_HOOK = { type: 'command', command: 'node other.mjs' };
 const OTHER_PROMPT = { type: 'command', command: 'node other-prompt.mjs' };
 const DECOY_MARKET = { type: 'command', command: 'node "/Users/x/.claude/plugins/marketplaces/non-dev-output/hooks/session-start.mjs"' };
 const DECOY_DEV = { type: 'command', command: 'node "/Users/x/Desktop/non-dev-output/hooks/session-start.mjs"' };
 const STOP_HOOK = { type: 'command', command: 'node stop.mjs' };
 
-const SETTINGS = {
-  model: 'opus',
-  hooks: {
-    SessionStart: [
-      { hooks: [OUR_SESSION] },
-      { matcher: 'startup', hooks: [OUR_SESSION_WIN, OTHER_HOOK] },
-      { hooks: [DECOY_MARKET] },
-      { hooks: [DECOY_DEV] },
-    ],
-    UserPromptSubmit: [{ hooks: [OUR_PROMPT] }, { hooks: [OTHER_PROMPT] }],
-    Stop: [{ hooks: [STOP_HOOK] }],
-  },
-  permissions: { allow: ['Read'] },
+// install.js가 적던 훅 명령은 `node "<설정 폴더>/plugins/non-dev-output/hooks/<파일>.mjs"` 모양이다. 설정 폴더에 맞춰 만든다.
+const hookCmd = (dir, file, win = false) => {
+  const path = `${dir}/plugins/non-dev-output/hooks/${file}`;
+  return `node "${win ? path.split('/').join('\\') : path}"`;
 };
-const SETTINGS_AFTER = {
-  model: 'opus',
-  hooks: {
-    SessionStart: [
-      { matcher: 'startup', hooks: [OTHER_HOOK] },
-      { hooks: [DECOY_MARKET] },
-      { hooks: [DECOY_DEV] },
-    ],
-    UserPromptSubmit: [{ hooks: [OTHER_PROMPT] }],
-    Stop: [{ hooks: [STOP_HOOK] }],
-  },
-  permissions: { allow: ['Read'] },
-};
+
+// 지워야 할 훅(our)과, 비슷하게 생겼지만 지우면 안 되는 훅(similar)을 섞은 settings.json과 정리 뒤 모습을 돌려준다.
+function settingsFor(dir) {
+  const our = {
+    session: { type: 'command', command: hookCmd(dir, 'session-start.mjs') },
+    sessionWin: { type: 'command', command: hookCmd(dir, 'session-start.mjs', true) },
+    prompt: { type: 'command', command: hookCmd(dir, 'clarity-keywords.mjs'), timeout: 5 },
+  };
+  const similar = {
+    compound: { type: 'command', command: `${hookCmd(dir, 'session-start.mjs')} && echo mine` }, // 사용자가 뒤에 명령을 붙인 것
+    outside: { type: 'command', command: 'node "/Users/x/work/plugins/non-dev-output/hooks/session-start.mjs"' }, // 설정 폴더 밖
+    unquoted: { type: 'command', command: `node ${dir}/plugins/non-dev-output/hooks/session-start.mjs` }, // 따옴표 없음
+  };
+  const keep = [{ hooks: [DECOY_MARKET] }, { hooks: [DECOY_DEV] }, ...Object.values(similar).map((h) => ({ hooks: [h] }))];
+  const before = {
+    model: 'opus',
+    hooks: {
+      SessionStart: [{ hooks: [our.session] }, { matcher: 'startup', hooks: [our.sessionWin, OTHER_HOOK] }, ...keep],
+      UserPromptSubmit: [{ hooks: [our.prompt] }, { hooks: [OTHER_PROMPT] }],
+      Stop: [{ hooks: [STOP_HOOK] }],
+    },
+    permissions: { allow: ['Read'] },
+  };
+  const after = {
+    model: 'opus',
+    hooks: {
+      SessionStart: [{ matcher: 'startup', hooks: [OTHER_HOOK] }, ...keep],
+      UserPromptSubmit: [{ hooks: [OTHER_PROMPT] }],
+      Stop: [{ hooks: [STOP_HOOK] }],
+    },
+    permissions: { allow: ['Read'] },
+  };
+  return { our, similar, before, after };
+}
 
 let fixtureCount = 0;
 function write(file, text) {
@@ -57,7 +66,7 @@ function write(file, text) {
 }
 
 // 예전 설치 흔적 + 남의 파일이 섞인 설정 폴더와 홈을 만든다. 홈은 설정 폴더와 따로 둬서 기록 파일 위치가 홈 기준임을 확인한다.
-function makeFixture({ settingsText = JSON.stringify(SETTINGS, null, 4), plugin = true, logs = true } = {}) {
+function makeFixture({ settingsText = (dir) => JSON.stringify(settingsFor(dir).before, null, 4), plugin = true, logs = true } = {}) {
   fixtureCount += 1;
   const dir = join(base, `config-${fixtureCount}`);
   const home = join(base, `home-${fixtureCount}`);
@@ -72,14 +81,14 @@ function makeFixture({ settingsText = JSON.stringify(SETTINGS, null, 4), plugin 
   write(join(dir, 'plugins', 'cache', 'keep.txt'), '유지\n');
   write(join(dir, 'plugins', 'marketplaces', 'non-dev-output', 'hooks', 'hooks.json'), '{}\n');
   write(join(dir, 'rules', 'common', 'user-config.md'), '# User Config\n');
-  if (settingsText !== null) write(join(dir, 'settings.json'), settingsText);
+  if (settingsText !== null) write(join(dir, 'settings.json'), typeof settingsText === 'function' ? settingsText(dir) : settingsText);
   if (logs) {
-    write(join(home, '.omc', 'state', 'clarity-events.jsonl'), '{"prompt":"앞 200자"}\n'.repeat(50));
+    if (logs !== 'claims') write(join(home, '.omc', 'state', 'clarity-events.jsonl'), '{"prompt":"앞 200자"}\n'.repeat(50));
     write(join(home, '.omc', 'state', 'clarity-claims', 'abc123'), '');
   }
   write(join(home, '.omc', 'state', 'other-tool.json'), '{"keep":true}\n');
   write(join(home, '.omc', 'project-memory.json'), '{}\n');
-  return { dir, home };
+  return { dir, home, cfg: settingsFor(dir) };
 }
 
 // 폴더 전체를 { 상대경로: 내용 } 으로 찍는다. 심볼릭 링크는 링크 자체를 기록한다.
@@ -108,6 +117,9 @@ function run(fx, args = []) {
   return { status: r.status, out: r.stdout + r.stderr };
 }
 
+// 읽기 전용으로 만든 폴더·파일을 풀어, 시험이 끝난 뒤 임시 폴더를 지울 수 있게 한다.
+const unlock = (root) => spawnSync('chmod', ['-R', 'u+w', root]);
+
 const backupsOf = (dir) => (existsSync(join(dir, 'backups')) ? readdirSync(join(dir, 'backups')) : []);
 const stateOf = (home) => join(home, '.omc', 'state');
 
@@ -135,19 +147,24 @@ const tests = [
     assert.match(r.out, /미리보기/);
     assert.ok(r.out.includes(join(fx.dir, 'plugins', 'non-dev-output')));
     assert.ok(r.out.includes('settings.json의 non-dev-output 훅 3개'));
+    // 지울 명령은 원문 그대로 한 줄씩 보여 준다
+    for (const h of Object.values(fx.cfg.our)) assert.ok(r.out.includes(h.command), `지울 명령이 미리보기에 없음: ${h.command}`);
+    // 모양이 다른 훅은 지우지 않고, 어떤 명령인지 보여 준다
+    assert.match(r.out, /건드리지 않는 것:/);
+    for (const h of Object.values(fx.cfg.similar)) assert.ok(r.out.includes(h.command), `남기는 명령이 알림에 없음: ${h.command}`);
     assert.ok(r.out.includes(join(stateOf(fx.home), 'clarity-events.jsonl')));
     assert.ok(r.out.includes(join(stateOf(fx.home), 'clarity-claims')));
     assert.match(r.out, /프롬프트 앞부분이 평문으로 들어 있을 수 있음/);
     assert.deepEqual([snapshot(fx.dir), snapshot(fx.home)], before);
   }],
   ['--apply는 백업을 만들고 우리 것만 지움, settings.json은 우리 훅만 뺌 (SessionStart와 UserPromptSubmit 모두)', () => {
-    const settingsText = JSON.stringify(SETTINGS, null, 4);
-    const fx = makeFixture({ settingsText });
+    const fx = makeFixture();
+    const settingsText = JSON.stringify(fx.cfg.before, null, 4);
     const topBefore = readdirSync(base).sort();
     const r = run(fx, ['--apply']);
     assert.equal(r.status, 0, r.out);
     assertCleaned(fx);
-    assert.equal(readFileSync(join(fx.dir, 'settings.json'), 'utf8'), JSON.stringify(SETTINGS_AFTER, null, 2) + '\n');
+    assert.equal(readFileSync(join(fx.dir, 'settings.json'), 'utf8'), JSON.stringify(fx.cfg.after, null, 2) + '\n');
     assert.match(r.out, /Claude Code를 다시 시작하세요/);
     assert.match(r.out, /omc-state 폴더에 들어 있습니다/);
 
@@ -199,7 +216,7 @@ const tests = [
     assert.equal(r.status, 0, r.out);
     assert.equal(readFileSync(join(fx.dir, 'plugins', 'non-dev-output', 'notes.txt'), 'utf8'), '남의 폴더\n');
     assert.match(r.out, /예전 non-dev-output 훅 파일이 없어 건드리지 않음/);
-    assert.deepEqual(JSON.parse(readFileSync(join(fx.dir, 'settings.json'), 'utf8')), SETTINGS_AFTER);
+    assert.deepEqual(JSON.parse(readFileSync(join(fx.dir, 'settings.json'), 'utf8')), fx.cfg.after);
   }],
   ['깨진 settings.json이면 settings.json과 예전 폴더는 남기고 기록 파일만 정리', () => {
     const broken = '{ "hooks": { "SessionStart": [ broken';
@@ -215,20 +232,23 @@ const tests = [
   ['깨진 settings.json을 고친 뒤 다시 실행하면 남은 것을 정리', () => {
     const fx = makeFixture({ settingsText: '{ broken' });
     assert.equal(run(fx, ['--apply']).status, 0);
-    writeFileSync(join(fx.dir, 'settings.json'), JSON.stringify(SETTINGS));
+    writeFileSync(join(fx.dir, 'settings.json'), JSON.stringify(fx.cfg.before));
     const r = run(fx, ['--apply']);
     assert.equal(r.status, 0, r.out);
     assertCleaned(fx);
-    assert.deepEqual(JSON.parse(readFileSync(join(fx.dir, 'settings.json'), 'utf8')), SETTINGS_AFTER);
+    assert.deepEqual(JSON.parse(readFileSync(join(fx.dir, 'settings.json'), 'utf8')), fx.cfg.after);
   }],
   ['BOM이 붙은 settings.json도 읽어서 처리', () => {
-    const fx = makeFixture({ settingsText: '\uFEFF' + JSON.stringify(SETTINGS) });
+    const fx = makeFixture({ settingsText: (dir) => '\uFEFF' + JSON.stringify(settingsFor(dir).before) });
     assert.equal(run(fx, ['--apply']).status, 0);
-    assert.deepEqual(JSON.parse(readFileSync(join(fx.dir, 'settings.json'), 'utf8')), SETTINGS_AFTER);
+    assert.deepEqual(JSON.parse(readFileSync(join(fx.dir, 'settings.json'), 'utf8')), fx.cfg.after);
   }],
   ['우리 훅만 있던 이벤트는 키까지 지우고, hooks가 비면 hooks 키도 지움', () => {
-    const only = { model: 'opus', hooks: { SessionStart: [{ hooks: [OUR_SESSION] }], UserPromptSubmit: [{ hooks: [OUR_PROMPT] }] } };
-    const fx = makeFixture({ settingsText: JSON.stringify(only) });
+    const only = (dir) => {
+      const { our } = settingsFor(dir);
+      return JSON.stringify({ model: 'opus', hooks: { SessionStart: [{ hooks: [our.session] }], UserPromptSubmit: [{ hooks: [our.prompt] }] } });
+    };
+    const fx = makeFixture({ settingsText: only });
     assert.equal(run(fx, ['--apply']).status, 0);
     assert.equal(readFileSync(join(fx.dir, 'settings.json'), 'utf8'), JSON.stringify({ model: 'opus' }, null, 2) + '\n');
   }],
@@ -236,13 +256,13 @@ const tests = [
     if (process.platform === 'win32') return 'skip'; // Windows는 링크 생성에 관리자 권한이 필요할 수 있음
     const fx = makeFixture({ settingsText: null });
     const realFile = join(base, `real-settings-${fixtureCount}.json`);
-    const original = JSON.stringify(SETTINGS, null, 2);
+    const original = JSON.stringify(fx.cfg.before, null, 2);
     writeFileSync(realFile, original);
     symlinkSync(realFile, join(fx.dir, 'settings.json'));
     const r = run(fx, ['--apply']);
     assert.equal(r.status, 0, r.out);
     assert.ok(lstatSync(join(fx.dir, 'settings.json')).isSymbolicLink(), '링크가 일반 파일로 바뀜');
-    assert.equal(readFileSync(realFile, 'utf8'), JSON.stringify(SETTINGS_AFTER, null, 2) + '\n');
+    assert.equal(readFileSync(realFile, 'utf8'), JSON.stringify(fx.cfg.after, null, 2) + '\n');
     const b = join(fx.dir, 'backups', backupsOf(fx.dir)[0], 'settings.json');
     assert.ok(!lstatSync(b).isSymbolicLink(), '백업이 링크로 남음');
     assert.equal(readFileSync(b, 'utf8'), original);
@@ -281,7 +301,7 @@ const tests = [
     if (process.platform === 'win32') return 'skip'; // 폴더 쓰기 금지(chmod) 흉내가 POSIX 전용
     const fx = makeFixture({ settingsText: null });
     const roDir = join(base, `read-only-${fixtureCount}`);
-    write(join(roDir, 'settings.json'), JSON.stringify(SETTINGS, null, 2));
+    write(join(roDir, 'settings.json'), JSON.stringify(fx.cfg.before, null, 2));
     symlinkSync(join(roDir, 'settings.json'), join(fx.dir, 'settings.json'));
     chmodSync(roDir, 0o555);
     try {
@@ -293,6 +313,51 @@ const tests = [
       assert.deepEqual(readdirSync(roDir), ['settings.json'], '임시 파일이 남음');
     } finally {
       chmodSync(roDir, 0o755);
+    }
+  }],
+  ['우리 모양과 다른 훅만 있으면 settings.json은 바이트까지 그대로, 명령을 보여 주고 예전 폴더는 정리', () => {
+    const lookalikes = (dir) => {
+      const { similar } = settingsFor(dir);
+      return JSON.stringify({ hooks: { SessionStart: Object.values(similar).map((h) => ({ hooks: [h] })) } }, null, 4);
+    };
+    const fx = makeFixture({ settingsText: lookalikes });
+    const before = readFileSync(join(fx.dir, 'settings.json'), 'utf8');
+    const r = run(fx, ['--apply']);
+    assert.equal(r.status, 0, r.out);
+    assert.equal(readFileSync(join(fx.dir, 'settings.json'), 'utf8'), before);
+    for (const h of Object.values(fx.cfg.similar)) assert.ok(r.out.includes(h.command), `남긴 명령이 알림에 없음: ${h.command}`);
+    assert.match(r.out, /예전 설치 폴더를 지우면 이 훅이 실패할 수 있으니 직접 고치세요/);
+    assert.equal(existsSync(join(fx.dir, 'plugins', 'non-dev-output')), false);
+  }],
+  ['중복 방지 폴더만 있으면 메시지 기록 파일 사본 안내를 하지 않음', () => {
+    const fx = makeFixture({ plugin: false, logs: 'claims', settingsText: null });
+    const r = run(fx, ['--apply']);
+    assert.equal(r.status, 0, r.out);
+    assert.equal(existsSync(join(stateOf(fx.home), 'clarity-claims')), false);
+    assert.doesNotMatch(r.out, /메시지 기록 파일의 사본/);
+    assert.doesNotMatch(r.out, /다시 시작/, '훅을 건드리지 않았는데 재시작을 안내함');
+    assert.equal(backupsOf(fx.dir).length, 1);
+  }],
+  ['install.js만 남은 폴더(지우다 멈춘 흔적)도 예전 폴더로 알아봄', () => {
+    const fx = makeFixture({ plugin: false });
+    write(join(fx.dir, 'plugins', 'non-dev-output', 'install.js'), '// 1.x\n');
+    const r = run(fx, ['--apply']);
+    assert.equal(r.status, 0, r.out);
+    assert.equal(existsSync(join(fx.dir, 'plugins', 'non-dev-output')), false);
+  }],
+  ['읽기 전용 폴더·파일이 끼어 있어도 예전 폴더를 지움 (Windows의 읽기 전용 .git 파일 대비)', () => {
+    if (process.platform === 'win32' || process.getuid() === 0) return 'skip'; // 읽기 전용 흉내는 POSIX 일반 사용자 전용
+    const fx = makeFixture();
+    const inner = join(fx.dir, 'plugins', 'non-dev-output', '.git', 'objects');
+    write(join(inner, 'pack.idx'), '읽기 전용\n');
+    chmodSync(join(inner, 'pack.idx'), 0o444);
+    chmodSync(inner, 0o555);
+    try {
+      const r = run(fx, ['--apply']);
+      assert.equal(r.status, 0, r.out);
+      assertCleaned(fx);
+    } finally {
+      unlock(fx.dir); // 백업 사본에도 읽기 전용 폴더가 따라와서 시험 뒷정리를 위해 푼다
     }
   }],
   ['흔적이 없는 설정 폴더와 홈', () => {
@@ -309,14 +374,18 @@ const tests = [
 ];
 
 let failed = 0;
+let skipped = 0;
 for (const [name, fn] of tests) {
   try {
-    console.log(`${fn() === 'skip' ? 'skip' : 'ok  '} ${name}`);
+    const result = fn();
+    if (result === 'skip') skipped += 1;
+    console.log(`${result === 'skip' ? 'skip' : 'ok  '} ${name}`);
   } catch (err) {
     failed += 1;
     console.log(`FAIL ${name}\n${err.message}`);
   }
 }
+if (process.platform !== 'win32') unlock(base);
 rmSync(base, { recursive: true, force: true });
-console.log(`\n${tests.length - failed}/${tests.length} 통과`);
+console.log(`\n${tests.length - failed - skipped}/${tests.length} 통과, ${skipped}개 건너뜀${failed ? `, ${failed}개 실패` : ''}`);
 process.exitCode = failed ? 1 : 0;

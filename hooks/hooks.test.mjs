@@ -48,14 +48,17 @@ const tests = [
 ];
 
 let failed = 0;
+let skipped = 0;
 for (const [name, fn] of tests) {
   try {
-    console.log(`${fn() === 'skip' ? 'skip' : 'ok  '} ${name}`);
+    const result = fn();
+    if (result === 'skip') skipped += 1;
+    console.log(`${result === 'skip' ? 'skip' : 'ok  '} ${name}`);
   } catch (err) {
     failed += 1;
     console.log(`FAIL ${name}\n${err.message}`);
   }
 }
 rmSync(bin, { recursive: true, force: true });
-console.log(`\n${tests.length - failed}/${tests.length} 통과`);
+console.log(`\n${tests.length - failed - skipped}/${tests.length} 통과, ${skipped}개 건너뜀${failed ? `, ${failed}개 실패` : ''}`);
 process.exitCode = failed ? 1 : 0;
